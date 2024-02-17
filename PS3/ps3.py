@@ -17,7 +17,7 @@ HAND_SIZE = 7
 
 SCRABBLE_LETTER_VALUES = {
     'a': 1, 'b': 3, 'c': 3, 'd': 2, 'e': 1, 'f': 4, 'g': 2, 'h': 4, 'i': 1, 'j': 8, 'k': 5, 'l': 1, 'm': 3, 'n': 1,
-    'o': 1, 'p': 3, 'q': 10, 'r': 1, 's': 1, 't': 1, 'u': 1, 'v': 4, 'w': 4, 'x': 8, 'y': 4, 'z': 10
+    'o': 1, 'p': 3, 'q': 10, 'r': 1, 's': 1, 't': 1, 'u': 1, 'v': 4, 'w': 4, 'x': 8, 'y': 4, 'z': 10, '*': 0,
 }
 
 # -----------------------------------
@@ -142,9 +142,11 @@ def deal_hand(n):
     n: int >= 0
     returns: dictionary (string -> int)
     """
+    if n <= 0:
+        return {}
 
-    hand = {}
-    num_vowels = int(math.ceil(n / 3))
+    hand = {'*': 1}
+    num_vowels = int(math.ceil(n / 3)) - 1
 
     for i in range(num_vowels):
         x = random.choice(VOWELS)
@@ -185,6 +187,7 @@ def update_hand(hand, word):
             new_hand[letter] -= 1
     return new_hand
 
+
 #
 # Problem #3: Test word validity
 #
@@ -199,8 +202,21 @@ def is_valid_word(word, hand, word_list):
     word_list: list of lowercase strings
     returns: boolean
     """
+    word = word.lower()
 
-    pass  # TO DO... Remove this line when you implement this function
+    in_list = False
+    for letter in VOWELS:
+        if word.replace('*', letter) in word_list:
+            in_list = True
+    if not in_list:
+        return False
+
+    copy_hand = hand.copy()
+    for letter in word:
+        copy_hand[letter] = copy_hand.get(letter, 0) - 1
+        if copy_hand[letter] < 0:
+            return False
+    return True
 
 
 #
