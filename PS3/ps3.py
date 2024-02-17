@@ -299,10 +299,8 @@ def play_hand(hand, word_list):
         hand = update_hand(hand, word)
         if calculate_handlen(hand) == 0:
             print('Ran out of letters. ', end='')
-    print(f'Total score: {total_score} points')
+    print(f'Total score for this hand:', total_score)
     return total_score
-
-
 
 
 #
@@ -336,8 +334,16 @@ def substitute_hand(hand, letter):
     letter: string
     returns: dictionary (string -> int)
     """
+    if letter not in hand:
+        return hand
 
-    pass  # TO DO... Remove this line when you implement this function
+    new_letter = letter
+    new_hand = hand.copy()
+    while new_letter in hand:
+        new_letter = random.choice(VOWELS + CONSONANTS)
+    new_hand[new_letter] = new_hand[letter]
+    del new_hand[letter]
+    return new_hand
 
 
 def play_game(word_list):
@@ -370,8 +376,50 @@ def play_game(word_list):
 
     word_list: list of lowercase strings
     """
+    num_hands = int(input('Enter total number of hands: '))
+    total_score, last_score = 0, 0
+    sub_used = False
+    replay_used = False
+    is_first = True
+    hand = deal_hand(HAND_SIZE)
 
-    print("play_game not implemented.")  # TO DO... Remove this line when you implement this function
+    while num_hands > 0 or not replay_used:
+        if is_first:
+            print('Current hand: ', end='')
+            display_hand(hand)
+
+        if not is_first and not replay_used:
+            is_replay = input('Would you like to replay the hand? ')
+            if is_replay == 'yes':
+                replay_used = True
+                total_score -= last_score
+                last_score = max(last_score, play_hand(hand, word_list))
+                total_score += last_score
+                print('--------------')
+                continue
+            else:
+                if num_hands == 0:
+                    break
+                hand = deal_hand(HAND_SIZE)
+                print('Current hand: ', end='')
+                display_hand(hand)
+
+        if replay_used:
+            hand = deal_hand(HAND_SIZE)
+
+        if not sub_used:
+            is_sub = input('Would you like to substitute a letter? ')
+            if is_sub == 'yes':
+                sub_used = True
+                rep_letter = input('Which letter would you like to replace: ')
+                hand = substitute_hand(hand, rep_letter)
+
+        last_score = play_hand(hand, word_list)
+        total_score += last_score
+        print('--------------')
+        num_hands -= 1
+        is_first = False
+    print('Total score over all hands:', total_score)
 
 
 #
